@@ -11,13 +11,11 @@ on:
       - main
 
 jobs:
-
   test:
 
     runs-on: ubuntu-latest
 
     services:
-
       mysql:
         image: mysql:8
 
@@ -29,7 +27,7 @@ jobs:
           - 3306:3306
 
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mysqladmin ping -proot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=3
@@ -47,11 +45,22 @@ jobs:
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
-
         with:
           php-version: 8.4
           extensions: pdo_mysql, redis
           coverage: none
+
+      # ADD THESE 3 STEPS
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Build Vite Assets
+        run: npm run build
 
       - name: Copy Environment File
         run: cp .env.example .env
@@ -63,8 +72,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Configure Database
-        run: |
-          php artisan config:clear
+        run: php artisan config:clear
 
       - name: Run Migrations
         env:
@@ -74,7 +82,6 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: root
           DB_PASSWORD: root
-
         run: php artisan migrate --force
 
       - name: Run Laravel Tests
