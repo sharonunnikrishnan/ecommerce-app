@@ -29,9 +29,8 @@ WORKDIR /var/www
 
 COPY . /var/www
 
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-RUN mkdir -p storage/framework/cache \
+RUN mkdir -p \
+    storage/framework/cache \
     storage/framework/views \
     storage/framework/sessions \
     storage/logs \
