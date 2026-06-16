@@ -86,3 +86,11 @@ jobs:
 
       - name: Run Laravel Tests
         run: php artisan test
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker compose build
