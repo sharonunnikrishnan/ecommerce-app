@@ -87,6 +87,7 @@ jobs:
       - name: Run Laravel Tests
         run: php artisan test
   docker-build:
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
@@ -102,5 +103,6 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          file: ./docker/php/Dockerfile
           push: true
           tags: sharonuk/ecommerce-app:latest

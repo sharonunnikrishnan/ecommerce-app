@@ -26,3 +26,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
+
+COPY . /var/www
+
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
