@@ -86,6 +86,7 @@ jobs:
 
       - name: Run Laravel Tests
         run: php artisan test
+
   docker-build:
     needs: test
     runs-on: ubuntu-latest
@@ -99,10 +100,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push
+      - name: Build and Push Production Image
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./docker/php/Dockerfile
+          file: ./docker/php/Dockerfile.prod
           push: true
-          tags: sharonuk/ecommerce-app:latest
+          tags: |
+            sharonuk/ecommerce-app:latest

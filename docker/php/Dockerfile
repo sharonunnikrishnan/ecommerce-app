@@ -1,5 +1,6 @@
 FROM php:8.4-fpm
 
+# System dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -8,27 +9,44 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     libpng-dev \
     libjpeg62-turbo-dev \
-    libfreetype6-dev
+    libfreetype6-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP Extensions
+RUN docker-php-ext-configure gd \
+    --with-freetype \
+    --with-jpeg
 
 RUN docker-php-ext-install \
-    pdo \
     pdo_mysql \
-    zip
+    zip \
+    gd
 
-# Install Redis extension
+# Redis Extension
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
-# Install Node.js 22 and npm
+# Node.js 22
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y nodejs
 
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-COPY . /var/www
+# Composer cache optimization
+COPY composer.json composer.lock ./
 
+RUN composer install \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader
+
+# Copy application
+COPY . .
+
+# Create Laravel directories
 RUN mkdir -p \
     storage/framework/cache \
     storage/framework/views \
@@ -36,8 +54,9 @@ RUN mkdir -p \
     storage/logs \
     bootstrap/cache
 
-RUN composer install \
-    --no-interaction \
-    --prefer-dist \
-    --optimize-autoloader \
-    --no-scripts
+# Permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+EXPOSE 9000
+
+CMD ["php-fpm"]
